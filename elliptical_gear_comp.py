@@ -6,7 +6,6 @@ from numpy import trapz
 
 ### TO DO ###
 # create change cassette gear and change crankset gear methods
-# remove the tangent method not needed
 # create bike class? rider class?
 # more accurate force profile
 # change crankset method so it only calculates the radius when you choose the gear ratio
@@ -63,9 +62,6 @@ class Crankset:
     def setSet(self,n):
         self.a = self.ab[n-1][0]
         self.b = self.ab[n-1][1]
-    
-    def getTangent(self,crankshaft,theta):
-        return self.b**2/(self.a**2*np.tan(theta+crankshaft.offset))
     
 class Crankshaft:
     def __init__(self,r,o):
