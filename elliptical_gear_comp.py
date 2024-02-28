@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 from math import pi
 from numpy import trapz
 
+### TO DO ###
+# create change cassette gear and change crankset gear methods
+# remove the tangent method not needed
+# create bike class? rider class?
+# more accurate force profile
+# change crankset method so it only calculates the radius when you choose the gear ratio
+# Find the correct gear diameters from my bike
+
 class Cassette:
 
     def __init__(self,R,n):
@@ -71,7 +79,7 @@ class Force:
         self.F = self.calcF(crankshaft,crankset)
 
     def calcF(self,crankshaft,crankset):
-        return self.W*np.sin(self.theta+crankshaft.offset)#crankset.getTangent(crankshaft,self.theta) 
+        return self.W*np.sin(self.theta+crankshaft.offset)
 
 def main():
 
