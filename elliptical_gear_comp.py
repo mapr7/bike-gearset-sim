@@ -4,12 +4,15 @@ import matplotlib.pyplot as plt
 from math import pi
 from numpy import trapz
 
+# Global variables
+GRAVITY = 9.81      # [m/s2]
+THETA = np.linspace(0,2*pi,100)
+
 ### TO DO ###
-# create change cassette gear and change crankset gear methods
 # create bike class? rider class?
 # more accurate force profile
-# change crankset method so it only calculates the radius when you choose the gear ratio
 # Find the correct gear diameters from my bike
+# Implement class inheritance for the crankset/crankshaft classes?
 
 def testCassette():
 
@@ -185,28 +188,28 @@ class Cassette:
     """
 
     def __init__(self,R,n):
-        self.R = R      #[mm]
-        self.R.sort()
-        self.num = n
+        self.R_cassette = R      #[mm]
+        self.R_cassette.sort()
+        self.num_cassette = n
     
     def changeCassette(self,R,n):
-        self.R = R
-        self.num = n
+        self.R_cassette = R
+        self.num_cassette = n
     
     def getSprocket(self,i):
-        return self.R[i-1]
+        return self.R_cassette[i-1]
     
     def setSprocket(self,r,i):
-        self.R[i-1] = r
+        self.R_cassette[i-1] = r
 
     def addSprocket(self,r):
-        self.R.append(r)
-        self.R.sort()
-        self.num += 1
+        self.R_cassette.append(r)
+        self.R_cassette.sort()
+        self.num_cassette += 1
 
     def removeSprocket(self,i):
-        self.R.pop(i-1)
-        self.num -= 1
+        self.R_cassette.pop(i-1)
+        self.num_cassette -= 1
     
 class Crankset:
     """
@@ -229,7 +232,7 @@ class Crankset:
     """
 
     def __init__(self,R,n,s):
-        self.num = n
+        self.num_crank = n
         self.ab = R
         self.ab.sort()
         self.shape = s
@@ -239,7 +242,7 @@ class Crankset:
         # self.r = self.ellipse(R)
         
     def changeCrankset(self,R,n,s):
-        self.num = n
+        self.num_crank = n
         self.ab = R
         self.shape = s
 
@@ -257,11 +260,11 @@ class Crankset:
         else: 
             self.ab.append(r)
             self.ab.sort()
-            self.num += 1
+            self.num_crank += 1
 
     def removeCrankGear(self,i):
         self.ab.pop(i-1)
-        self.num -= 1
+        self.num_crank -= 1
 
     def getCrankGear(self,i):
         return self.ab[i-1]
@@ -290,7 +293,7 @@ class Crankshaft:
     """
 
     def __init__(self,r,o):
-        self.R = r          #[mm]
+        self.R_crankshaft = r          #[mm]
         self.offset = o     #[rad]
 
     def setOffset(self,o):
@@ -299,11 +302,56 @@ class Crankshaft:
     def getOffset(self):
         return self.offset
 
-    def setRadius(self,r):
-        self.R = r
+    def setRadiusShaft(self,r):
+        self.R_crankshaft = r
 
-    def getRadius(self):
-        return self.R
+    def getRadiusShaft(self):
+        return self.R_crankshaft
+    
+class Bike(Crankshaft,Crankset,Cassette):
+
+    def __init__(self,R_crankshaft,o,R_crankset,n_crankset,s,R_cassette,n_cassette,person,w_radius):
+        Crankshaft.__init__(self,R_crankshaft,o)
+        Crankset.__init__(self,R_crankset,n_crankset,s)
+        Cassette.__init__(self,R_cassette,n_cassette)
+        self.rider = person
+        # self.mass ? (mass of the bike frame)
+        self.wheelR = w_radius
+        self.backgear = 1
+        self.frontgear = 2
+
+    def calcDriveTorque(self):
+        return self.getRadiusShaft()*self.calcGearRatio()*self.rider.F(self.offset)
+
+    def calcDriveForce(self):
+        return self.calcDriveTorque()/self.wheelR
+
+    def calcGearRatio(self):
+        return self.getSprocket(self.backgear)/self.calcRadius(self.frontgear,THETA)
+
+    def calcGearOverlap(self):
+        # one calculation if the type is non-circular maybe graph like define an error bar for the range of gear ratios
+        # one calculation if the type is circular and plot the calculation
+        pass
+
+    def changeGear(self,back,front):
+        self.backgear = back
+        self.frontgear = front
+
+    def simRide(self):
+        pass
+
+
+class Rider:
+    # Class to define a rider on the bike
+    # methods like calcF
+    # Maybe linkage mechanism simulation for the leg mechanics and joint torques?
+    def __init__(self,m):
+        self.mass = m
+    
+    def F(self,o):
+        return self.mass*GRAVITY*np.sin(THETA+o)
+
 
 class Force:
     def __init__(self,mg,th,crankshaft):
@@ -333,16 +381,22 @@ def main():
     set = 2
     sprocket = 1
 
+    Manon = Rider(64)
+    bike_circle = Bike(150,0,[54,34],2,'c',[11,12,13,14,15],5,Manon,500)
+    bike_biopace = Bike(150,0,[(56,52),(36,32)],2,'e',[11,12,13,14,15],5,Manon,500)
+
     # # Should change these forces and torques to go inside the crankset class definition
     P = Force(64*9.81,theta,crankshaft)
 
-    T_circle = crankshaft.R*cassette.getSprocket(sprocket)*P.F/circle.calcRadius(set,theta)
-    T_biopace = crankshaft.R*cassette.getSprocket(sprocket)*P.F/biopace.calcRadius(set,theta)
-    T_qring = crankshaft.R*cassette.getSprocket(sprocket)*P.F/qring.calcRadius(set,theta)
+    T_circle = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/circle.calcRadius(set,theta)
+    T_biopace = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/biopace.calcRadius(set,theta)
+    T_qring = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/qring.calcRadius(set,theta)
 
     # plt.plot(theta,P_circle.F*crankshaft.R,color='yellow',label="P_circle")
     plt.plot(theta,T_circle,color="red",label='T_circle')
+    plt.plot(THETA,bike_circle.calcDriveTorque(),color="pink",label='T_circle')
     plt.plot(theta,T_biopace,color="blue",label='T_biopace')
+    plt.plot(THETA,bike_biopace.calcDriveTorque(),color="cyan",label='T_biopace')
     plt.plot(theta,T_qring,color="green",label='T_qring')
     plt.xlabel("Theta", fontsize = 10)
     plt.ylabel("Torque",fontsize=10)
