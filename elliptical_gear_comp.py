@@ -359,6 +359,15 @@ class Bike:
         self.backgear = back
         self.frontgear = front
 
+    def changeCassette(self,c):
+        self.cassette = c
+
+    def changeCrankshaft(self,c):
+        self.crankshaft = c
+
+    def changeCrankset(self,c):
+        self.crankset = c
+
     def simRide(self):
         pass
 
