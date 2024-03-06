@@ -310,29 +310,56 @@ class Crankshaft:
     
 class Bike(Crankshaft,Crankset,Cassette):
 
-    def __init__(self,R_crankshaft,o,R_crankset,n_crankset,s,R_cassette,n_cassette,person,w_radius):
+    def __init__(self,R_crankshaft,o,R_crankset,n_crankset,s,R_cassette,n_cassette,person,w_radius,m_bike):
         Crankshaft.__init__(self,R_crankshaft,o)
         Crankset.__init__(self,R_crankset,n_crankset,s)
         Cassette.__init__(self,R_cassette,n_cassette)
         self.rider = person
-        # self.mass ? (mass of the bike frame)
+        self.mass = m_bike
         self.wheelR = w_radius
         self.backgear = 1
         self.frontgear = 2
 
     def calcDriveTorque(self):
-        return self.getRadiusShaft()*self.calcGearRatio()*self.rider.F(self.offset)
+        return self.getRadiusShaft()*self.calcGearRatio(self.backgear,self.frontgear)*self.rider.F(self.offset)
 
     def calcDriveForce(self):
         return self.calcDriveTorque()/self.wheelR
 
-    def calcGearRatio(self):
-        return self.getSprocket(self.backgear)/self.calcRadius(self.frontgear,THETA)
+    def calcGearRatio(self,b,f):
+        return self.getSprocket(b)/self.calcRadius(f,THETA)
 
     def calcGearOverlap(self):
-        # one calculation if the type is non-circular maybe graph like define an error bar for the range of gear ratios
-        # one calculation if the type is circular and plot the calculation
-        pass
+        i = 0
+        g = []
+        m = ['b','r','g','c']
+        for c in (np.linspace(1,self.num_crank,self.num_crank,dtype=int)):
+            for s in (np.linspace(1,self.num_cassette,self.num_cassette,dtype=int)):
+                if self.shape == 'c':
+                    g.append((1/self.calcGearRatio(s,c),m[i]))
+                    big = max(g)[0]     # Not the best but I can't think of a better strategy at the moment
+                else:
+                    g.append(((1/min(self.calcGearRatio(s,c)),1/max(self.calcGearRatio(s,c))),m[i]))
+                    big = max(g)[0][0]
+            i +=1
+        g.sort()
+        
+        # Plot the gear ratios
+        x = 0
+        if self.shape == 'c':
+            for t in g:
+                plt.plot(x,t[0],color=t[1],marker='o')
+                x += 1
+        else:
+            for t in g:
+                plt.errorbar(x,t[0][1]+(t[0][0]-t[0][1])/2,yerr=(t[0][0]-t[0][1])/2,color=t[1],marker='o')
+                x += 1
+        for n in (np.linspace(1,self.num_crank,self.num_crank,dtype=int)):
+            plt.text(0,big-0.25*n,'Crank '+str(n),color=m[n-1])
+        plt.xlabel('Gear Number')
+        plt.ylabel('Gear Ratio')
+        plt.title('Gear Ratio Overlap')
+        plt.show()
 
     def changeGear(self,back,front):
         self.backgear = back
@@ -341,17 +368,16 @@ class Bike(Crankshaft,Crankset,Cassette):
     def simRide(self):
         pass
 
-
 class Rider:
     # Class to define a rider on the bike
     # methods like calcF
     # Maybe linkage mechanism simulation for the leg mechanics and joint torques?
-    def __init__(self,m):
+    def __init__(self,m,n):
         self.mass = m
+        self.name = n
     
     def F(self,o):
         return self.mass*GRAVITY*np.sin(THETA+o)
-
 
 class Force:
     def __init__(self,mg,th,crankshaft):
@@ -381,29 +407,33 @@ def main():
     set = 2
     sprocket = 1
 
-    Manon = Rider(64)
-    bike_circle = Bike(150,0,[54,34],2,'c',[11,12,13,14,15],5,Manon,500)
-    bike_biopace = Bike(150,0,[(56,52),(36,32)],2,'e',[11,12,13,14,15],5,Manon,500)
+    Manon = Rider(64,'Manon')
+    bike_circle = Bike(150,0,[44,34],2,'c',[11,12,13,14,15],5,Manon,500,3)
+    bike_biopace = Bike(150,0,[(46,42),(36,32)],2,'e',[11,12,13,14,15],5,Manon,500,3)
+    bike_qring = Bike(150,0,[(52,56),(32,36)],2,'e',[11,12,13,14,15],5,Manon,500,3)
+
+    bike_circle.calcGearOverlap()
 
     # # Should change these forces and torques to go inside the crankset class definition
-    P = Force(64*9.81,theta,crankshaft)
+    # P = Force(64*9.81,theta,crankshaft)
 
-    T_circle = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/circle.calcRadius(set,theta)
-    T_biopace = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/biopace.calcRadius(set,theta)
-    T_qring = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/qring.calcRadius(set,theta)
+    # T_circle = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/circle.calcRadius(set,theta)
+    # T_biopace = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/biopace.calcRadius(set,theta)
+    # T_qring = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/qring.calcRadius(set,theta)
 
-    # plt.plot(theta,P_circle.F*crankshaft.R,color='yellow',label="P_circle")
-    plt.plot(theta,T_circle,color="red",label='T_circle')
-    plt.plot(THETA,bike_circle.calcDriveTorque(),color="pink",label='T_circle')
-    plt.plot(theta,T_biopace,color="blue",label='T_biopace')
-    plt.plot(THETA,bike_biopace.calcDriveTorque(),color="cyan",label='T_biopace')
-    plt.plot(theta,T_qring,color="green",label='T_qring')
-    plt.xlabel("Theta", fontsize = 10)
-    plt.ylabel("Torque",fontsize=10)
-    plt.xticks([0,np.pi/2,np.pi,3*np.pi/2,2*np.pi],['0','pi/2','pi','3pi/2','2pi'])
-    plt.grid(True)
-    plt.legend()
-    plt.show()
+    # # plt.plot(theta,P_circle.F*crankshaft.R,color='yellow',label="P_circle")
+    # # plt.plot(theta,T_circle,color="red",label='T_circle')
+    # plt.plot(THETA,bike_circle.calcDriveTorque(),color="pink",label='T_circle')
+    # # plt.plot(theta,T_biopace,color="blue",label='T_biopace')
+    # plt.plot(THETA,bike_biopace.calcDriveTorque(),color="cyan",label='T_biopace')
+    # plt.plot(THETA,bike_qring.calcDriveTorque(),color="cyan",label='T_biopace')
+    # # plt.plot(theta,T_qring,color="green",label='T_qring')
+    # plt.xlabel("Theta", fontsize = 10)
+    # plt.ylabel("Torque",fontsize=10)
+    # plt.xticks([0,np.pi/2,np.pi,3*np.pi/2,2*np.pi],['0','pi/2','pi','3pi/2','2pi'])
+    # plt.grid(True)
+    # plt.legend()
+    # plt.show()
 
 
 if __name__ == '__main__':
