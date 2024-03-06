@@ -26,23 +26,23 @@ def testCassette():
     print(test_circle.R)
     print(test_circle.num)
 
-    test_circle.changeCassette([24,44],2)
+    test_circle.changeGearAssembly([24,44],2)
 
     print(test_circle.R)
     print(test_circle.num)
 
-    print(test_circle.getSprocket(2))
+    print(test_circle.getGear(2))
 
-    test_circle.setSprocket(54,2)
+    test_circle.setGear(54,2)
 
     print(test_circle.R)
 
-    test_circle.addSprocket(34)
+    test_circle.addGear(34)
 
     print(test_circle.R)
     print(test_circle.num)
 
-    test_circle.removeSprocket(2)
+    test_circle.removeGear(2)
 
     print(test_circle.R)
     print(test_circle.num)
@@ -54,23 +54,23 @@ def testCassette():
     print(test_ellipse.R)
     print(test_ellipse.num)
 
-    test_ellipse.changeCassette([(22,26),(42,46)],2)
+    test_ellipse.changeGearAssembly([(22,26),(42,46)],2)
 
     print(test_ellipse.R)
     print(test_ellipse.num)
 
-    print(test_ellipse.getSprocket(2))
+    print(test_ellipse.getGear(2))
 
-    test_ellipse.setSprocket((52,56),2)
+    test_ellipse.setGear((52,56),2)
 
     print(test_ellipse.R)
 
-    test_ellipse.addSprocket((32,36))
+    test_ellipse.addGear((32,36))
 
     print(test_ellipse.R)
     print(test_ellipse.num)
     
-    test_ellipse.removeSprocket(2)
+    test_ellipse.removeGear(2)
 
     print(test_ellipse.R)
     print(test_ellipse.num)
@@ -81,36 +81,36 @@ def testCrankset():
 
     test_circle = Crankset([54,34],2,'c')
 
-    print(test_circle.ab)
+    print(test_circle.R)
     print(test_circle.num)
     print(test_circle.shape)
 
-    test_circle.changeCrankset([(22,26),(42,46)],2,'e')
+    test_circle.changeGearAssembly([(22,26),(42,46)],2,'e')
 
-    print(test_circle.ab)
+    print(test_circle.R)
     print(test_circle.num)
     print(test_circle.shape)
 
-    test_circle.changeCrankset([24,44],2,'c')
+    test_circle.changeGearAssembly([24,44],2,'c')
 
-    print(test_circle.ab)
+    print(test_circle.R)
     print(test_circle.num)
     print(test_circle.shape)
 
-    print(test_circle.getCrankGear(2))
+    print(test_circle.getGear(2))
 
-    test_circle.setCrankGear(54,2)
+    test_circle.setGear(54,2)
 
-    print(test_circle.ab)
+    print(test_circle.R)
 
-    test_circle.addCrankGear(34)
+    test_circle.addGear(34)
 
-    print(test_circle.ab)
+    print(test_circle.R)
     print(test_circle.num)
 
-    test_circle.removeCrankGear(2)
+    test_circle.removeGear(2)
 
-    print(test_circle.ab)
+    print(test_circle.R)
     print(test_circle.num)
 
     print(test_circle.calcRadius(1,np.linspace(0,pi,10)))
@@ -119,34 +119,34 @@ def testCrankset():
 
     test_ellipse = Crankset([(52,56),(32,36)],2,'e')
 
-    print(test_ellipse.ab)
+    print(test_ellipse.R)
     print(test_ellipse.num)
     print(test_ellipse.shape)
 
-    test_ellipse.changeCrankset([(22,26),(42,46)],2,'e')
+    test_ellipse.changeGearAssembly([(22,26),(42,46)],2,'e')
 
-    print(test_ellipse.ab)
+    print(test_ellipse.R)
     print(test_ellipse.num)
     print(test_ellipse.shape)
 
-    print(test_ellipse.getCrankGear(2))
+    print(test_ellipse.getGear(2))
 
-    test_ellipse.setCrankGear((52,56),2)
+    test_ellipse.setGear((52,56),2)
 
-    print(test_ellipse.ab)
+    print(test_ellipse.R)
 
-    test_ellipse.setCrankGear(54,2)
+    test_ellipse.setGear(54,2)
 
-    test_ellipse.addCrankGear((32,36))
+    test_ellipse.addGear((32,36))
 
-    print(test_ellipse.ab)
+    print(test_ellipse.R)
     print(test_ellipse.num)
 
-    test_ellipse.addCrankGear(54)
+    test_ellipse.addGear(54)
 
-    test_ellipse.removeCrankGear(2)
+    test_ellipse.removeGear(2)
 
-    print(test_ellipse.ab)
+    print(test_ellipse.R)
     print(test_ellipse.num)
 
     print(test_ellipse.calcRadius(1,np.linspace(0,pi,10)))
@@ -180,38 +180,41 @@ class Cassette:
     n: integer number of the sprockets in the cassette
 
     Methods:
-    changeCassette(R: array, n:int): changes the entire cassette assembly to the new sprocket sizes defined in R with number of sprockets n
-    getSprocket(i: int): returns the radius of the sprocket at index i in the list
-    setSprocket(r: float, i: int): changes the radius of the sprocket at index i to radius r 
-    addSprocket(r: float): adds a sprocket to the cassette assembly
-    removeSprocket(i: int): removes the sprocket at index i from the cassette assembly
+    changeGearAssembly(R: array, n:int): changes the entire cassette assembly to the new sprocket sizes defined in R with number of sprockets n
+    getGear(i: int): returns the radius of the sprocket at index i in the list
+    setGear(r: float, i: int): changes the radius of the sprocket at index i to radius r 
+    addGear(r: float): adds a sprocket to the cassette assembly
+    removeGear(i: int): removes the sprocket at index i from the cassette assembly
     """
 
     def __init__(self,R,n):
-        self.R_cassette = R      #[mm]
-        self.R_cassette.sort()
-        self.num_cassette = n
+        self.R = R      #[mm]
+        self.R.sort()
+        self.num = n
     
-    def changeCassette(self,R,n):
-        self.R_cassette = R
-        self.num_cassette = n
+    def changeGearAssembly(self,R,n):
+        self.R = R
+        self.num = n
     
-    def getSprocket(self,i):
-        return self.R_cassette[i-1]
+    def getGear(self,i):
+        return self.R[i-1]
     
-    def setSprocket(self,r,i):
-        self.R_cassette[i-1] = r
+    def setGear(self,r,i):
+        self.R[i-1] = r
 
-    def addSprocket(self,r):
-        self.R_cassette.append(r)
-        self.R_cassette.sort()
-        self.num_cassette += 1
+    def addGear(self,r):
+        self.R.append(r)
+        self.R.sort()
+        self.num += 1
 
-    def removeSprocket(self,i):
-        self.R_cassette.pop(i-1)
-        self.num_cassette -= 1
+    def removeGear(self,i):
+        self.R.pop(i-1)
+        self.num -= 1
+
+    def getNum(self):
+        return self.num
     
-class Crankset:
+class Crankset(Cassette):
     """
     Class defining a Crankset object
 
@@ -223,57 +226,48 @@ class Crankset:
     s: character indicating the shape type of the crankset --> 'c': circular, 'e': elliptical
 
     Methods:
-    changeCrankset(R: array, n: int, s: char): changes the parameters of teh crankset assembly
-    setCrankGear(r: float, i: int): changes the crank gear at the specified index to a new radius value in mm
-    addCrankGear(r: float): adds a new crank gear with radius r in mm to the crankset assembly
+    changeGearAssembly(R: array, n: int, s: char): changes the parameters of teh crankset assembly
+    setGear(r: float, i: int): changes the crank gear at the specified index to a new radius value in mm
+    addGear(r: float): adds a new crank gear with radius r in mm to the crankset assembly
     removeCrankGear(i:int): removes the crank gear at position i from the crankset assembly
     getCrankGear(i:int): returns the radius information for the specified gear. The return value is a float if the gear has shape 'c' and a tuple if the gear has shape 'e'
     calcRadius(i: int, t: float array): calculates the radius of teh crank gear. Returns a float radius in mm if the gear has shape 'c' and an array of radii in mm defining a rotation (t) of the crank gear if the shape is 'e'
     """
 
     def __init__(self,R,n,s):
-        self.num_crank = n
-        self.ab = R
-        self.ab.sort()
+        Cassette.__init__(self,R,n)
         self.shape = s
-
-        # remove these
-        # self.theta = th
-        # self.r = self.ellipse(R)
         
-    def changeCrankset(self,R,n,s):
-        self.num_crank = n
-        self.ab = R
+    def changeGearAssembly(self,R,n,s):
+        # Overwrite cassette method
+        self.num = n
+        self.R = R
         self.shape = s
 
-    def setCrankGear(self,r,i):
-        if type(self.ab[i-1]) != type(r):
+    def setGear(self,r,i):
+        if type(self.R[i-1]) != type(r):
             print("error: cannot mix crank gear shapes")
             exit
         else: 
-            self.ab[i-1] = r
+            self.R[i-1] = r
+    
+    def getShape(self):
+        return self.shape
 
-    def addCrankGear(self,r):
-        if type(self.ab[0]) != type(r):
+    def addGear(self,r):
+        if type(self.R[0]) != type(r):
             print("error: cannot mix crank gear shapes")
             exit
         else: 
-            self.ab.append(r)
-            self.ab.sort()
-            self.num_crank += 1
-
-    def removeCrankGear(self,i):
-        self.ab.pop(i-1)
-        self.num_crank -= 1
-
-    def getCrankGear(self,i):
-        return self.ab[i-1]
+            self.R.append(r)
+            self.R.sort()
+            self.num += 1
     
     def calcRadius(self,i,t):
         if self.shape == 'c':
-            return self.getCrankGear(i)
+            return self.getGear(i)
         else:
-            g = self.getCrankGear(i)
+            g = self.getGear(i)
             return g[0]*g[1]/np.sqrt((g[0]*np.cos(t))**2+(g[1]*np.sin(t))**2)
     
 class Crankshaft:
@@ -327,15 +321,15 @@ class Bike:
         return self.calcDriveTorque()/self.wheelR
 
     def calcGearRatio(self,b,f):
-        return self.cassette.getSprocket(b)/self.crankset.calcRadius(f,THETA)
+        return self.cassette.getGear(b)/self.crankset.calcRadius(f,THETA)
 
     def calcGearOverlap(self):
         i = 0
         g = []
         m = ['b','r','g','c']
-        for c in (np.linspace(1,self.crankset.num_crank,self.crankset.num_crank,dtype=int)):
-            for s in (np.linspace(1,self.cassette.num_cassette,self.cassette.num_cassette,dtype=int)):
-                if self.crankset.shape == 'c':
+        for c in (np.linspace(1,self.crankset.getNum(),self.crankset.getNum(),dtype=int)):
+            for s in (np.linspace(1,self.cassette.getNum(),self.cassette.getNum(),dtype=int)):
+                if self.crankset.getShape() == 'c':
                     g.append((1/self.calcGearRatio(s,c),m[i]))
                     big = max(g)[0]     # Not the best but I can't think of a better strategy at the moment
                 else:
@@ -346,7 +340,7 @@ class Bike:
         
         # Plot the gear ratios
         x = 0
-        if self.crankset.shape == 'c':
+        if self.crankset.getShape() == 'c':
             for t in g:
                 plt.plot(x,t[0],color=t[1],marker='o')
                 x += 1
@@ -354,7 +348,7 @@ class Bike:
             for t in g:
                 plt.errorbar(x,t[0][1]+(t[0][0]-t[0][1])/2,yerr=(t[0][0]-t[0][1])/2,color=t[1],marker='o')
                 x += 1
-        for n in (np.linspace(1,self.crankset.num_crank,self.crankset.num_crank,dtype=int)):
+        for n in (np.linspace(1,self.crankset.getNum(),self.crankset.getNum(),dtype=int)):
             plt.text(0,big-0.25*n,'Crank '+str(n),color=m[n-1])
         plt.xlabel('Gear Number')
         plt.ylabel('Gear Ratio')
