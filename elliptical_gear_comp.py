@@ -308,12 +308,12 @@ class Crankshaft:
     def getRadiusShaft(self):
         return self.R_crankshaft
     
-class Bike(Crankshaft,Crankset,Cassette):
+class Bike:
 
-    def __init__(self,R_crankshaft,o,R_crankset,n_crankset,s,R_cassette,n_cassette,person,w_radius,m_bike):
-        Crankshaft.__init__(self,R_crankshaft,o)
-        Crankset.__init__(self,R_crankset,n_crankset,s)
-        Cassette.__init__(self,R_cassette,n_cassette)
+    def __init__(self,crankshaft,crankset,cassette,person,w_radius,m_bike):
+        self.crankshaft = crankshaft
+        self.crankset = crankset
+        self.cassette = cassette
         self.rider = person
         self.mass = m_bike
         self.wheelR = w_radius
@@ -321,21 +321,21 @@ class Bike(Crankshaft,Crankset,Cassette):
         self.frontgear = 2
 
     def calcDriveTorque(self):
-        return self.getRadiusShaft()*self.calcGearRatio(self.backgear,self.frontgear)*self.rider.F(self.offset)
+        return self.crankshaft.getRadiusShaft()*self.calcGearRatio(self.backgear,self.frontgear)*self.rider.F(self.crankshaft.getOffset())
 
     def calcDriveForce(self):
         return self.calcDriveTorque()/self.wheelR
 
     def calcGearRatio(self,b,f):
-        return self.getSprocket(b)/self.calcRadius(f,THETA)
+        return self.cassette.getSprocket(b)/self.crankset.calcRadius(f,THETA)
 
     def calcGearOverlap(self):
         i = 0
         g = []
         m = ['b','r','g','c']
-        for c in (np.linspace(1,self.num_crank,self.num_crank,dtype=int)):
-            for s in (np.linspace(1,self.num_cassette,self.num_cassette,dtype=int)):
-                if self.shape == 'c':
+        for c in (np.linspace(1,self.crankset.num_crank,self.crankset.num_crank,dtype=int)):
+            for s in (np.linspace(1,self.cassette.num_cassette,self.cassette.num_cassette,dtype=int)):
+                if self.crankset.shape == 'c':
                     g.append((1/self.calcGearRatio(s,c),m[i]))
                     big = max(g)[0]     # Not the best but I can't think of a better strategy at the moment
                 else:
@@ -346,7 +346,7 @@ class Bike(Crankshaft,Crankset,Cassette):
         
         # Plot the gear ratios
         x = 0
-        if self.shape == 'c':
+        if self.crankset.shape == 'c':
             for t in g:
                 plt.plot(x,t[0],color=t[1],marker='o')
                 x += 1
@@ -354,7 +354,7 @@ class Bike(Crankshaft,Crankset,Cassette):
             for t in g:
                 plt.errorbar(x,t[0][1]+(t[0][0]-t[0][1])/2,yerr=(t[0][0]-t[0][1])/2,color=t[1],marker='o')
                 x += 1
-        for n in (np.linspace(1,self.num_crank,self.num_crank,dtype=int)):
+        for n in (np.linspace(1,self.crankset.num_crank,self.crankset.num_crank,dtype=int)):
             plt.text(0,big-0.25*n,'Crank '+str(n),color=m[n-1])
         plt.xlabel('Gear Number')
         plt.ylabel('Gear Ratio')
@@ -390,61 +390,44 @@ class Rider:
     def setName(self,n):
         self.name = n
 
-class Force:
-    def __init__(self,mg,th,crankshaft):
-        self.W = mg
-        self.theta = th
-        self.F = self.calcF(crankshaft)
-
-    def calcF(self,crankshaft):
-        return self.W*np.sin(self.theta+crankshaft.offset)
-
 def main():
 
     # testCassette()
     # testCrankset()
     # testCrankshaft()
 
-    # Add a bycicle class which can be built up of the cassette class and the crankset class and a rider class?
-
-    theta = np.linspace(0,2*pi,100)
-
+    # Initiate the cassette and crankshaft objects
     cassette = Cassette([11,12,13,14,15],5)
+    crankshaft = Crankshaft(150,0)
+
+    # Initiation the crankset objects with different shapes
     biopace = Crankset([(56,52),(36,32)],2,'e')
     qring = Crankset([(52,56),(32,36)],2,'e')
     circle = Crankset([54,34],2,'c')
-    crankshaft = Crankshaft(150,0)
 
-    set = 2
-    sprocket = 1
-
+    # Initiate the bike rider
     Manon = Rider(64,'Manon')
-    bike_circle = Bike(150,0,[44,34],2,'c',[11,12,13,14,15],5,Manon,500,3)
-    bike_biopace = Bike(150,0,[(46,42),(36,32)],2,'e',[11,12,13,14,15],5,Manon,500,3)
-    bike_qring = Bike(150,0,[(52,56),(32,36)],2,'e',[11,12,13,14,15],5,Manon,500,3)
 
+    # Create the different bike objects
+    bike_circle = Bike(crankshaft,circle,cassette,Manon,500,3)
+    bike_biopace = Bike(crankshaft,biopace,cassette,Manon,500,3)
+    bike_qring = Bike(crankshaft,qring,cassette,Manon,500,3)
+
+    # Look at gear ratio overlap for each bike type
     bike_circle.calcGearOverlap()
+    bike_biopace.calcGearOverlap()
+    bike_qring.calcGearOverlap()
 
-    # # Should change these forces and torques to go inside the crankset class definition
-    # P = Force(64*9.81,theta,crankshaft)
-
-    # T_circle = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/circle.calcRadius(set,theta)
-    # T_biopace = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/biopace.calcRadius(set,theta)
-    # T_qring = crankshaft.R_crankshaft*cassette.getSprocket(sprocket)*P.F/qring.calcRadius(set,theta)
-
-    # # plt.plot(theta,P_circle.F*crankshaft.R,color='yellow',label="P_circle")
-    # # plt.plot(theta,T_circle,color="red",label='T_circle')
-    # plt.plot(THETA,bike_circle.calcDriveTorque(),color="pink",label='T_circle')
-    # # plt.plot(theta,T_biopace,color="blue",label='T_biopace')
-    # plt.plot(THETA,bike_biopace.calcDriveTorque(),color="cyan",label='T_biopace')
-    # plt.plot(THETA,bike_qring.calcDriveTorque(),color="cyan",label='T_biopace')
-    # # plt.plot(theta,T_qring,color="green",label='T_qring')
-    # plt.xlabel("Theta", fontsize = 10)
-    # plt.ylabel("Torque",fontsize=10)
-    # plt.xticks([0,np.pi/2,np.pi,3*np.pi/2,2*np.pi],['0','pi/2','pi','3pi/2','2pi'])
-    # plt.grid(True)
-    # plt.legend()
-    # plt.show()
+    # Plot comparison between drive torque for different cranksets
+    plt.plot(THETA,bike_circle.calcDriveTorque(),color="pink",label='T_circle')
+    plt.plot(THETA,bike_biopace.calcDriveTorque(),color="cyan",label='T_biopace')
+    plt.plot(THETA,bike_qring.calcDriveTorque(),color="lime",label='T_qring')
+    plt.xlabel("Theta", fontsize = 10)
+    plt.ylabel("Torque",fontsize=10)
+    plt.xticks([0,np.pi/2,np.pi,3*np.pi/2,2*np.pi],['0','pi/2','pi','3pi/2','2pi'])
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':
