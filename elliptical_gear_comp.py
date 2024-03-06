@@ -370,7 +370,6 @@ class Bike(Crankshaft,Crankset,Cassette):
 
 class Rider:
     # Class to define a rider on the bike
-    # methods like calcF
     # Maybe linkage mechanism simulation for the leg mechanics and joint torques?
     def __init__(self,m,n):
         self.mass = m
@@ -378,6 +377,18 @@ class Rider:
     
     def F(self,o):
         return self.mass*GRAVITY*np.sin(THETA+o)
+    
+    def getMass(self):
+        return self.mass
+    
+    def setMass(self,m):
+        self.mass = m
+
+    def getName(self):
+        return self.name
+    
+    def setName(self,n):
+        self.name = n
 
 class Force:
     def __init__(self,mg,th,crankshaft):
